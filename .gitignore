@@ -1,0 +1,5 @@
+__pycache__/
+tiles_cache/
+labels_cache/
+output/
+*.pyc

@@ -1,0 +1,66 @@
+* { box-sizing: border-box; }
+html, body { height: 100%; margin: 0; font-family: system-ui, sans-serif; }
+body { display: flex; }
+
+#sidebar {
+  width: 340px; min-width: 340px; padding: 16px;
+  overflow-y: auto; background: #f7f8fa; border-right: 1px solid #ddd;
+  display: flex; flex-direction: column; gap: 12px;
+}
+#sidebar h1 { font-size: 18px; margin: 0 0 4px; }
+
+label { display: flex; flex-direction: column; gap: 4px; font-size: 13px; color: #333; }
+label.chk { flex-direction: row; align-items: center; gap: 6px; }
+
+select, input[type=text], textarea {
+  font: inherit; padding: 6px 8px; border: 1px solid #bbb; border-radius: 4px;
+  width: 100%;
+}
+textarea { resize: vertical; }
+
+button {
+  font: inherit; font-weight: 600; padding: 10px;
+  background: #0099ff; color: #fff; border: 0; border-radius: 6px; cursor: pointer;
+}
+button:disabled { background: #b3d9f5; cursor: default; }
+button:not(:disabled):hover { background: #007fd6; }
+
+fieldset { border: 1px solid #ccc; border-radius: 6px; font-size: 13px;
+  display: flex; flex-direction: column; gap: 5px; padding: 8px 10px; }
+legend { font-size: 12px; color: #555; padding: 0 4px; }
+button.secondary { background: #e8eef4; color: #123; padding: 7px; font-weight: 500; }
+button.secondary:not(:disabled):hover { background: #d5e2ee; }
+.hint { font-size: 11px; color: #777; }
+
+.addlabel { display: flex; flex-direction: column; gap: 5px;
+  border-top: 1px dashed #ccc; padding-top: 7px; }
+.addlabel-row { display: flex; gap: 6px; }
+.addlabel-row select { flex: 1; }
+.addlabel-row button { padding: 6px 10px; }
+
+.label-editor { display: flex; flex-direction: column; gap: 6px;
+  font-size: 13px; min-width: 210px; }
+.label-editor input[type=text] { width: 100%; }
+.label-editor .angle-row { display: flex; align-items: center; gap: 6px; }
+.label-editor .angle-row input[type=range] { flex: 1; }
+.label-editor button.del { background: #e5533d; color: #fff; border: 0;
+  border-radius: 4px; padding: 5px; cursor: pointer; }
+
+.map-label { white-space: nowrap; font-family: "Times New Roman", serif;
+  color: #282828; cursor: move; user-select: none;
+  text-shadow: -1px -1px 0 #fff, 1px -1px 0 #fff, -1px 1px 0 #fff, 1px 1px 0 #fff,
+               0 -1px 0 #fff, 0 1px 0 #fff, -1px 0 0 #fff, 1px 0 0 #fff; }
+/* размер шрифта задаётся скриптом по масштабу рамки листа */
+.map-label.k-place { font-weight: 700; }
+.map-label.k-mo { font-weight: 700; }
+.map-label.k-district { font-weight: 700; text-transform: uppercase; }
+
+#status { font-size: 13px; min-height: 18px; }
+#status.ok { color: #1a7f37; }
+#status.err { color: #c0392b; }
+#status a { color: #0969da; }
+
+.help { font-size: 12px; color: #555; border-top: 1px solid #ddd; padding-top: 10px; }
+.help ul { padding-left: 18px; margin: 6px 0; }
+
+#map { flex: 1; height: 100%; }

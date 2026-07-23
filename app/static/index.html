@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<title>Схемы границ территорий</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="/vendor/leaflet.css">
+<link rel="stylesheet" href="/vendor/leaflet-geoman.css">
+<link rel="stylesheet" href="/style.css">
+</head>
+<body>
+<div id="sidebar">
+  <h1>Схема границ территории</h1>
+
+  <label>Подложка
+    <select id="basemap"></select>
+  </label>
+
+  <label>Приложение №
+    <input id="annex" type="text" placeholder="например: 1 (пусто = __)">
+  </label>
+
+  <label>Территория
+    <textarea id="territory" rows="3"
+      placeholder="Киевское шоссе от Красносельского шоссе до Проектируемой магистрали 1"></textarea>
+  </label>
+
+  <fieldset id="dxfimport">
+    <legend>Импорт границы из DXF</legend>
+    <label>Система координат чертежа
+      <select id="dxfcrs"></select>
+    </label>
+    <label>Оси чертежа
+      <select id="dxfaxes">
+        <option value="auto">Определить автоматически</option>
+        <option value="xy">X = восток (CAD)</option>
+        <option value="yx">X = север (геодезия)</option>
+      </select>
+    </label>
+    <input id="dxffile" type="file" accept=".dxf">
+    <button id="dxfload" type="button" class="secondary" disabled>Загрузить контур</button>
+    <div class="hint">DWG сначала сохраните как DXF (в CAD или бесплатным
+      ODA File Converter). Берётся наибольший замкнутый контур чертежа.</div>
+  </fieldset>
+
+  <fieldset id="labelkinds">
+    <legend>Надписи на схеме</legend>
+    <label class="chk"><input type="checkbox" value="street" checked> Улицы</label>
+    <label class="chk"><input type="checkbox" value="place" checked> Населённые пункты</label>
+    <label class="chk"><input type="checkbox" value="mo"> Муниципальные образования</label>
+    <label class="chk"><input type="checkbox" value="district"> Районы</label>
+    <label>Масштаб надписей: <span id="labelscaleval">1.0</span>×
+      <input id="labelscale" type="range" min="0.4" max="2.5" step="0.1" value="1">
+    </label>
+    <button id="loadlabels" type="button" class="secondary" disabled>Показать надписи</button>
+    <div class="addlabel">
+      <input id="newlabeltext" type="text" placeholder="Своя надпись…">
+      <div class="addlabel-row">
+        <select id="newlabelkind"></select>
+        <button id="addlabel" type="button" class="secondary">Добавить</button>
+      </div>
+    </div>
+    <div class="hint">Надписи можно перетаскивать; клик — редактор
+      (текст, поворот, категория); двойной клик — убрать.
+      Размер на карте показан как на будущем листе.</div>
+  </fieldset>
+
+  <label>Тип объекта
+    <select id="objtype">
+      <option value="linear">Линейный (протяжённость, км)</option>
+      <option value="areal">Площадной (площадь, га)</option>
+      <option value="none">Без показателя</option>
+    </select>
+  </label>
+
+  <label class="chk">
+    <input id="northarrow" type="checkbox" checked> Значок севера на схеме
+  </label>
+
+  <label class="chk">
+    <input id="manualframe" type="checkbox" disabled> Рамка вручную
+    (тянуть углы; перенос — кнопкой «Перенести слой»)
+  </label>
+
+  <label class="chk">
+    <input id="openword" type="checkbox" checked> Открыть в Word после генерации
+  </label>
+
+  <button id="generate" disabled>Сформировать Word</button>
+  <div id="status"></div>
+
+  <div class="help">
+    <b>Как рисовать:</b>
+    <ul>
+      <li>Кнопка <b>многоугольника</b> на карте слева — ставьте точки кликами, замкните кликом по первой точке.</li>
+      <li>Режим <b>редактирования</b> — двигайте и удаляйте вершины (правый клик по вершине — удалить).</li>
+      <li>Режим <b>перемещения</b> — двигайте контур целиком.</li>
+      <li><b>Корзина</b> — удалить контур.</li>
+    </ul>
+    Тайлы кэшируются на диск: всё, что вы уже смотрели, работает без интернета.
+  </div>
+</div>
+<div id="map"></div>
+
+<script src="/vendor/leaflet.js"></script>
+<script src="/vendor/leaflet-geoman.min.js"></script>
+<script src="/app.js"></script>
+</body>
+</html>

@@ -15,6 +15,15 @@ git archive --format=tar HEAD | ssh pi5 'set -e
   sudo install -d -o $USER -g $USER /opt/pi5 /opt/pi5/boundary
   cd /opt/pi5/boundary
   rm -rf src.new && mkdir src.new && tar xf - -C src.new
-  rm -rf src && mv src.new src'
+  rm -rf src && mv src.new src
+  # Пока не залит реальный пароль (scripts/boundary-secret.sh) — временный
+  # .env со случайным паролем: вход ВКЛючён, но войти нельзя (адрес открыт
+  # в интернет через Funnel, пускать без пароля нельзя).
+  if [ ! -f .env ]; then
+    (umask 077
+     printf "APP_PASSWORD=locked-%s\nSESSION_SECRET=%s\n" \
+       "$(head -c9 /dev/urandom | base64 | tr -dc A-Za-z0-9)" \
+       "$(head -c33 /dev/urandom | base64 | tr -dc A-Za-z0-9)" > .env)
+  fi'
 
 "$pi5_repo/scripts/deploy.sh" boundary

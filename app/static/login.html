@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>Вход — Схемы границ территорий</title>
+<style>
+  * { box-sizing: border-box; }
+  body { margin: 0; min-height: 100vh; display: flex; align-items: center;
+    justify-content: center; background: #f0f2f5;
+    font-family: system-ui, sans-serif; }
+  .card { background: #fff; padding: 28px 26px; border-radius: 10px;
+    box-shadow: 0 6px 24px rgba(0,0,0,.1); width: 320px; max-width: 92vw;
+    display: flex; flex-direction: column; gap: 12px; }
+  h1 { font-size: 18px; margin: 0; }
+  p.hint { font-size: 13px; color: #666; margin: 0; }
+  input { font: inherit; padding: 9px 11px; border: 1px solid #bbb;
+    border-radius: 6px; width: 100%; }
+  button { font: inherit; font-weight: 600; padding: 10px; border: 0;
+    border-radius: 6px; background: #0099ff; color: #fff; cursor: pointer; }
+  button:disabled { background: #b3d9f5; }
+  button:not(:disabled):hover { background: #007fd6; }
+  .error { font-size: 13px; color: #c0392b; min-height: 16px; }
+</style>
+</head>
+<body>
+<form class="card" id="form" autocomplete="off">
+  <h1>Схемы границ территорий</h1>
+  <p class="hint">Введите пароль доступа.</p>
+  <input type="password" id="password" name="password" placeholder="Пароль"
+         autocomplete="current-password" required autofocus>
+  <button class="primary" type="submit" id="submit">Войти</button>
+  <div class="error" id="error" role="alert"></div>
+</form>
+<script>
+const form = document.getElementById('form');
+const errorBox = document.getElementById('error');
+const submit = document.getElementById('submit');
+form.addEventListener('submit', async (e) => {
+  e.preventDefault();
+  errorBox.textContent = '';
+  submit.disabled = true;
+  try {
+    const body = new FormData();
+    body.append('password', document.getElementById('password').value);
+    const res = await fetch('/api/login', { method: 'POST', body });
+    if (res.ok) { location.href = '/'; return; }
+    const data = await res.json().catch(() => ({}));
+    errorBox.textContent = data.detail || 'Не удалось войти';
+  } catch (err) {
+    errorBox.textContent = 'Сервер недоступен';
+  } finally {
+    submit.disabled = false;
+  }
+});
+</script>
+</body>
+</html>

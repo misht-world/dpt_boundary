@@ -1,0 +1,11 @@
+.git
+.venv
+.env
+data
+tiles_cache
+labels_cache
+output
+template
+**/__pycache__
+*.pyc
+.claude

@@ -8,6 +8,8 @@ import datetime
 import os
 import pathlib
 import re
+import sys
+import time
 from io import BytesIO
 
 from fastapi import FastAPI, File, Form, HTTPException, Response, UploadFile
@@ -16,17 +18,36 @@ from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 
+from . import auth
 from .basemaps import BASEMAPS
 from .docgen import build_docx
 from .dxf_import import CRS, import_dxf
 from .labels import KINDS, get_labels
+from .paths import OUTPUT_DIR
 from .render import padded_bbox, render_map
 from .tiles import get_tile
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
-OUTPUT_DIR = ROOT / "output"
+
+# Готовые документы одноразовые: чистим всё старше часа при каждой генерации.
+OUTPUT_TTL_SECONDS = 3600
 
 app = FastAPI(title="dpt_boundary")
+auth.install(app)
+
+
+def _sweep_output() -> None:
+    """Удаляет .docx старше OUTPUT_TTL_SECONDS, чтобы диск не рос."""
+    deadline = time.time() - OUTPUT_TTL_SECONDS
+    try:
+        for p in OUTPUT_DIR.glob("*.docx"):
+            try:
+                if p.stat().st_mtime < deadline:
+                    p.unlink()
+            except OSError:
+                pass
+    except OSError:
+        pass
 
 
 @app.get("/api/basemaps")
@@ -169,13 +190,16 @@ def api_generate(req: GenerateRequest):
     img.save(buf, "PNG")
     buf.seek(0)
 
+    _sweep_output()
     safe = re.sub(r'[\\/:*?"<>|]+', "_", req.territory).strip() or "схема"
     stamp = datetime.datetime.now().strftime("%Y-%m-%d_%H%M%S")
     out = OUTPUT_DIR / f"Приложение - {safe[:80]} {stamp}.docx"
     build_docx(buf, req.territory, req.annex_no, out, line_px=line_px,
                metric_text=_metric_text(coords, req.object_type))
 
-    if req.open_word:
+    # «Открыть в Word» — только на ПК; на сервере (Linux) Word нет,
+    # документ скачивается по ссылке /api/download.
+    if req.open_word and sys.platform == "win32":
         try:
             os.startfile(str(out))  # откроет в Word
         except OSError:

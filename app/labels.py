@@ -8,12 +8,10 @@
 import hashlib
 import json
 import math
-import pathlib
 
 import requests
 
-ROOT = pathlib.Path(__file__).resolve().parent.parent
-CACHE_DIR = ROOT / "labels_cache"
+from .paths import LABELS_CACHE as CACHE_DIR
 
 OVERPASS_URLS = [
     "https://overpass-api.de/api/interpreter",

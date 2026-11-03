@@ -20,17 +20,30 @@ PADDING = 0.18                 # отступ вокруг границы, до�
 # доступная область листа под карту (см. docgen), мм
 PAGE_IMG_W_MM, PAGE_IMG_H_MM = 165.0, 207.0
 
-_FONT_DIR = "C:/Windows/Fonts"
-_FONTS = {False: ["times.ttf", "arial.ttf", "DejaVuSans.ttf"],
-          True: ["timesbd.ttf", "arialbd.ttf", "DejaVuSans-Bold.ttf"]}
+# Шрифт для подписей на карте. На ПК — Times New Roman; на Linux-сервере
+# его нет, поэтому ищем метрически близкий Liberation Serif (ставится в
+# образ), затем DejaVu. Порядок сохраняет прежний вид на ПК.
+_FONT_DIRS = [
+    "C:/Windows/Fonts",
+    "/usr/share/fonts/truetype/liberation",
+    "/usr/share/fonts/truetype/dejavu",
+    "/usr/share/fonts",
+]
+_FONTS = {
+    False: ["times.ttf", "LiberationSerif-Regular.ttf", "DejaVuSerif.ttf",
+            "arial.ttf", "DejaVuSans.ttf"],
+    True: ["timesbd.ttf", "LiberationSerif-Bold.ttf", "DejaVuSerif-Bold.ttf",
+           "arialbd.ttf", "DejaVuSans-Bold.ttf"],
+}
 
 
 def _load_font(size: int, bold: bool):
-    for name in _FONTS[bold]:
-        try:
-            return ImageFont.truetype(f"{_FONT_DIR}/{name}", size)
-        except OSError:
-            continue
+    for directory in _FONT_DIRS:
+        for name in _FONTS[bold]:
+            try:
+                return ImageFont.truetype(f"{directory}/{name}", size)
+            except OSError:
+                continue
     return ImageFont.load_default()
 
 

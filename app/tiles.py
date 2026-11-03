@@ -4,15 +4,12 @@
 Всё, что было скачано хоть раз, остаётся в tiles_cache/ и дальше
 используется без обращения к интернету.
 """
-import pathlib
 import threading
 
 import requests
 
 from .basemaps import SOURCES
-
-ROOT = pathlib.Path(__file__).resolve().parent.parent
-CACHE_DIR = ROOT / "tiles_cache"
+from .paths import TILES_CACHE as CACHE_DIR
 
 _session = requests.Session()
 _session.headers["User-Agent"] = "dpt-boundary/1.0 (boundary scheme generator)"

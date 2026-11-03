@@ -23,7 +23,7 @@ from .basemaps import BASEMAPS
 from .docgen import build_docx
 from .dxf_import import CRS, import_dxf
 from .labels import KINDS, get_labels
-from .paths import OUTPUT_DIR
+from .paths import OUTPUT_DIR, TILES_CACHE
 from .render import padded_bbox, render_map
 from .tiles import get_tile
 
@@ -31,6 +31,11 @@ ROOT = pathlib.Path(__file__).resolve().parent.parent
 
 # Готовые документы одноразовые: чистим всё старше часа при каждой генерации.
 OUTPUT_TTL_SECONDS = 3600
+
+# Предел кэша тайлов (МБ). 0 = без предела (по умолчанию на ПК — кэш
+# постоянный). На сервере задаётся CACHE_MAX_MB, чтобы диск не засорялся:
+# при превышении удаляются самые старые тайлы (LRU по времени изменения).
+CACHE_MAX_MB = int(os.environ.get("CACHE_MAX_MB", "0"))
 
 app = FastAPI(title="dpt_boundary")
 auth.install(app)
@@ -44,6 +49,36 @@ def _sweep_output() -> None:
             try:
                 if p.stat().st_mtime < deadline:
                     p.unlink()
+            except OSError:
+                pass
+    except OSError:
+        pass
+
+
+def _sweep_tiles() -> None:
+    """Держит tiles_cache в пределах CACHE_MAX_MB, удаляя самые старые тайлы."""
+    if CACHE_MAX_MB <= 0:
+        return
+    limit = CACHE_MAX_MB * 1024 * 1024
+    try:
+        files = []
+        total = 0
+        for p in TILES_CACHE.rglob("*.png"):
+            try:
+                st = p.stat()
+            except OSError:
+                continue
+            files.append((st.st_mtime, st.st_size, p))
+            total += st.st_size
+        if total <= limit:
+            return
+        target = int(limit * 0.9)  # чистим с запасом, чтобы не делать это часто
+        for _mtime, size, p in sorted(files):  # старые первыми
+            if total <= target:
+                break
+            try:
+                p.unlink()
+                total -= size
             except OSError:
                 pass
     except OSError:
@@ -191,6 +226,7 @@ def api_generate(req: GenerateRequest):
     buf.seek(0)
 
     _sweep_output()
+    _sweep_tiles()
     safe = re.sub(r'[\\/:*?"<>|]+', "_", req.territory).strip() or "схема"
     stamp = datetime.datetime.now().strftime("%Y-%m-%d_%H%M%S")
     out = OUTPUT_DIR / f"Приложение - {safe[:80]} {stamp}.docx"

@@ -56,8 +56,16 @@ button.secondary:not(:disabled):hover { background: #d5e2ee; }
 .map-label.k-district { font-weight: 700; text-transform: uppercase; }
 
 #status { font-size: 13px; min-height: 18px; }
-#status.ok { color: #1a7f37; }
+#status.ok { color: #1a7f37; font-weight: 600; }
 #status.err { color: #c0392b; }
+#status.busy { color: #0969da; font-weight: 600; }
+#status.busy::before {
+  content: ""; display: inline-block; width: 11px; height: 11px;
+  margin-right: 6px; vertical-align: -1px; border: 2px solid #9ec5e8;
+  border-top-color: #0969da; border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
 #status a { color: #0969da; }
 
 .help { font-size: 12px; color: #555; border-top: 1px solid #ddd; padding-top: 10px; }

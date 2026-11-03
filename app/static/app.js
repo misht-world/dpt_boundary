@@ -407,14 +407,27 @@ function activeLabels() {
 }
 
 /* --- генерация --- */
+function triggerDownload(file) {
+  // скачиваем сразу после генерации (файл уже сохранён на сервере)
+  const a = document.createElement("a");
+  a.href = "/api/download/" + encodeURIComponent(file);
+  a.download = file;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+}
+
 el("generate").addEventListener("click", async () => {
   if (!boundary) return;
   const latlngs = boundary.getLatLngs()[0];
   const coords = latlngs.map((p) => [p.lng, p.lat]);
   const status = el("status");
-  status.className = "";
-  status.textContent = "Собираю карту и документ…";
-  el("generate").disabled = true;
+  const btn = el("generate");
+  const btnText = btn.textContent;
+  status.className = "busy";
+  status.textContent = "Формирую документ…";
+  btn.textContent = "Формирую…";
+  btn.disabled = true;
   try {
     const resp = await fetch("/api/generate", {
       method: "POST",
@@ -440,14 +453,17 @@ el("generate").addEventListener("click", async () => {
     });
     if (!resp.ok) throw new Error((await resp.json()).detail || resp.statusText);
     const data = await resp.json();
+    triggerDownload(data.file);
     status.className = "ok";
     status.innerHTML =
-      "Готово: <a href=\"/api/download/" + encodeURIComponent(data.file) +
-      "\">скачать</a> · сохранено в папку output";
+      "✓ Готово — документ скачан. " +
+      "<a href=\"/api/download/" + encodeURIComponent(data.file) +
+      "\" download>скачать ещё раз</a>";
   } catch (err) {
     status.className = "err";
     status.textContent = "Ошибка: " + err.message;
   } finally {
-    el("generate").disabled = !boundary;
+    btn.textContent = btnText;
+    btn.disabled = !boundary;
   }
 });
